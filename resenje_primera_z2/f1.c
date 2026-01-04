@@ -34,7 +34,7 @@ Vozac* ucitajVozace(int* brojVozaca) {
         if (pomocni == NULL) {
             fclose(ulaz);
             free(niz);
-            return NULL;
+            return 1;
         }
 
         niz = pomocni;
