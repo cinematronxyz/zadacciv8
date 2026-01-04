@@ -21,7 +21,7 @@ Vozac* ucitajVozace(int* brojVozaca) {
     ulaz = fopen("drivers.txt", "r");
     if (ulaz == NULL) {
         printf("Greska pri otvaranju fajla drivers.txt\n");
-        return NULL;
+        return 1;
     }
 
     while (fscanf(ulaz, "%s %s %d %d",
@@ -34,7 +34,7 @@ Vozac* ucitajVozace(int* brojVozaca) {
         if (pomocni == NULL) {
             fclose(ulaz);
             free(niz);
-            return 1;
+            return NULL;
         }
 
         niz = pomocni;
