@@ -10,34 +10,41 @@ typedef struct {
 
 Vozac* ucitajVozace(int* brojVozaca) {
     FILE* ulaz;
-    Vozac* niz;
-    Vozac* pomocni;
+    Vozac* niz = NULL;
     Vozac temp;
-    int i;
+    int kapacitet = 10;
 
     *brojVozaca = 0;
-    niz = NULL;
 
     ulaz = fopen("drivers.txt", "r");
     if (ulaz == NULL) {
         printf("Greska pri otvaranju fajla drivers.txt\n");
-        return 1;
+        return NULL;
     }
 
-    while (fscanf(ulaz, "%s %s %d %d",
+    niz = (Vozac*)malloc(kapacitet * sizeof(Vozac));
+    if (niz == NULL) {
+        fclose(ulaz);
+        return NULL;
+    }
+
+    while (fscanf(ulaz, "%49s %49s %d %d",
                   temp.ime,
                   temp.prezime,
                   &temp.brojPobeda,
                   &temp.brojPolPozicija) == 4) {
 
-        pomocni = (Vozac*)realloc(niz, (*brojVozaca + 1) * sizeof(Vozac));
-        if (pomocni == NULL) {
-            fclose(ulaz);
-            free(niz);
-            return NULL;
+        if (*brojVozaca == kapacitet) {
+            kapacitet *= 2;
+            Vozac* pomocni = (Vozac*)realloc(niz, kapacitet * sizeof(Vozac));
+            if (pomocni == NULL) {
+                free(niz);
+                fclose(ulaz);
+                return NULL;
+            }
+            niz = pomocni;
         }
 
-        niz = pomocni;
         niz[*brojVozaca] = temp;
         (*brojVozaca)++;
     }
@@ -46,9 +53,8 @@ Vozac* ucitajVozace(int* brojVozaca) {
     return niz;
 }
 
-void ispisiPolPozicije(Vozac* niz, int brojVozaca) {
+void ispisiPolPozicije(const Vozac* niz, int brojVozaca) {
     int i;
-
     printf("Osvajaci barem jedne pol pozicije:\n");
 
     for (i = 0; i < brojVozaca; i++) {
@@ -68,7 +74,6 @@ void sortirajVozace(Vozac* niz, int brojVozaca) {
 
     for (i = 0; i < brojVozaca - 1; i++) {
         for (j = i + 1; j < brojVozaca; j++) {
-
             if (niz[i].brojPobeda < niz[j].brojPobeda ||
                (niz[i].brojPobeda == niz[j].brojPobeda &&
                 niz[i].brojPolPozicija < niz[j].brojPolPozicija)) {
@@ -81,7 +86,7 @@ void sortirajVozace(Vozac* niz, int brojVozaca) {
     }
 }
 
-void upisiUFajl(Vozac* niz, int brojVozaca) {
+void upisiUFajl(const Vozac* niz, int brojVozaca) {
     FILE* izlaz;
     int i;
 
@@ -90,6 +95,8 @@ void upisiUFajl(Vozac* niz, int brojVozaca) {
         printf("Greska pri otvaranju fajla results.txt\n");
         return;
     }
+
+    fprintf(izlaz, "IME PREZIME POBEDE POL_POZICIJE\n");
 
     for (i = 0; i < brojVozaca; i++) {
         fprintf(izlaz, "%s %s %d %d\n",
@@ -108,16 +115,14 @@ int main() {
 
     vozaci = ucitajVozace(&brojVozaca);
     if (vozaci == NULL) {
+        printf("Neuspesno ucitavanje vozaca.\n");
         return 1;
     }
 
     ispisiPolPozicije(vozaci, brojVozaca);
-
     sortirajVozace(vozaci, brojVozaca);
-
     upisiUFajl(vozaci, brojVozaca);
 
     free(vozaci);
-
     return 0;
 }
