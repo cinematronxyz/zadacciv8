@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct {
@@ -18,32 +19,30 @@ int main() {
         return 1;
     }
 
-    Film f[100];
-    int n = 0, i, j;
-    char line[256];
+    int n;
+    fscanf(ulaz, "%d", &n);
 
-    while (n < 100 && fgets(line, sizeof(line), ulaz)) {
-
-        if (sscanf(line, " %99[^0-9] %lf %lf %lf",
-                   f[n].naziv,
-                   &f[n].ocena,
-                   &f[n].budzet,
-                   &f[n].zarada) == 4) {
-
-            size_t len = strlen(f[n].naziv);
-            if (len > 0 && f[n].naziv[len - 1] == ' ')
-                f[n].naziv[len - 1] = '\0';
-
-            if (f[n].ocena > 7) {
-                f[n].razlika = f[n].zarada - f[n].budzet;
-                n++;
-            }
-        }
+    Film *f = (Film *)malloc(n * sizeof(Film));
+    if (f == NULL) {
+        printf("Greska pri alokaciji memorije.\n");
+        fclose(ulaz);
+        fclose(izlaz);
+        return 1;
     }
 
-    for (i = 0; i < n - 1; i++) {
-        for (j = i + 1; j < n; j++) {
-            if (f[j].razlika > f[i].razlika) {
+    for (int i = 0; i < n; i++) {
+        fscanf(ulaz, "%99s %lf %lf %lf",
+               f[i].naziv,
+               &f[i].ocena,
+               &f[i].budzet,
+               &f[i].zarada);
+
+        f[i].razlika = f[i].zarada - f[i].budzet;
+    }
+
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (f[i].ocena < f[j].ocena) {
                 Film tmp = f[i];
                 f[i] = f[j];
                 f[j] = tmp;
@@ -51,7 +50,7 @@ int main() {
         }
     }
 
-    for (i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         fprintf(izlaz, "%s %.2lf %.2lf %.2lf %.2lf\n",
                 f[i].naziv,
                 f[i].ocena,
@@ -59,6 +58,8 @@ int main() {
                 f[i].zarada,
                 f[i].razlika);
     }
+
+    free(f);
 
     fclose(ulaz);
     fclose(izlaz);
