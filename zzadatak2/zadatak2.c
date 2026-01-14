@@ -14,16 +14,21 @@ int main() {
     FILE *ulaz = fopen("filmovi.txt", "r");
     FILE *izlaz = fopen("najpopularniji.txt", "w");
 
-    if (ulaz == NULL || izlaz == NULL) {
+    if (!ulaz || !izlaz) {
         printf("Greska pri otvaranju fajla.\n");
         return 1;
     }
 
     int n;
-    fscanf(ulaz, "%d", &n);
+    if (fscanf(ulaz, "%d", &n) != 1 || n <= 0) {
+        printf("Neispravan broj filmova.\n");
+        fclose(ulaz);
+        fclose(izlaz);
+        return 1;
+    }
 
-    Film *f = (Film *)malloc(n * sizeof(Film));
-    if (f == NULL) {
+    Film *f = malloc(n * sizeof(Film));
+    if (!f) {
         printf("Greska pri alokaciji memorije.\n");
         fclose(ulaz);
         fclose(izlaz);
@@ -31,12 +36,17 @@ int main() {
     }
 
     for (int i = 0; i < n; i++) {
-        fscanf(ulaz, "%99s %lf %lf %lf",
-               f[i].naziv,
-               &f[i].ocena,
-               &f[i].budzet,
-               &f[i].zarada);
-
+        if (fscanf(ulaz, "%99s %lf %lf %lf",
+                   f[i].naziv,
+                   &f[i].ocena,
+                   &f[i].budzet,
+                   &f[i].zarada) != 4) {
+            printf("Greska pri citanju podataka.\n");
+            free(f);
+            fclose(ulaz);
+            fclose(izlaz);
+            return 1;
+        }
         f[i].razlika = f[i].zarada - f[i].budzet;
     }
 
@@ -60,9 +70,7 @@ int main() {
     }
 
     free(f);
-
     fclose(ulaz);
     fclose(izlaz);
-
     return 0;
 }
