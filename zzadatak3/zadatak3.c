@@ -11,7 +11,6 @@ int main() {
         return 1;
     }
 
-    /* DINAMIČKA ALOKACIJA STRINGOVA */
     char *ime = (char *)malloc(50 * sizeof(char));
     char *prezime = (char *)malloc(50 * sizeof(char));
 
@@ -42,7 +41,6 @@ int main() {
         fprintf(izlaz, "%s %s %.2lf\n", ime, prezime, prosek);
     }
 
-    /* OSLOBAĐANJE MEMORIJE */
     free(ime);
     free(prezime);
 
