@@ -47,7 +47,6 @@ int main() {
         fprintf(izlaz, "%s (%.2f €/m2)\n", niz[i].sifra, niz[i].cena_m2);
     }
 
-    // primer: pronalaženje minimuma i maksimuma
     double minCena = niz[count-1].cena_m2;
     double maxCena = niz[0].cena_m2;
     fprintf(izlaz, "\nNajmanja cena/m2: %.2f\n", minCena);
