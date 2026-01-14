@@ -15,16 +15,6 @@ int time_to_min(int h, int m) {
     return h * 60 + m;
 }
 
-int compare(const void *a, const void *b) {
-    Aktivnost *x = (Aktivnost *)a;
-    Aktivnost *y = (Aktivnost *)b;
-
-    if (x->start != y->start)
-        return x->start - y->start;
-
-    return x->end - y->end;
-}
-
 void write_activity(FILE *f, Aktivnost a) {
     fprintf(f, "%02d:%02d %02d:%02d %s\n",
             a.start / 60, a.start % 60,
@@ -33,9 +23,7 @@ void write_activity(FILE *f, Aktivnost a) {
 }
 
 int main() {
-    FILE *ulaz = fopen("C:\Users\SVOJE IME\FOLDER\IME FOLDERA/ZADATKA\kalendar.txt", "r"); 
-    // ovde staviti svoj path, ili samo staviti: FILE *fin = fopen("kalendar.txt", "r"); 
-    //meni trenutno u vscodeu trenutno radi samo ova verzija sa tacnim path-om... send recs
+    FILE *fin = fopen("kalendar.txt", "r");  
     if (!fin) {
         printf("Greska pri otvaranju kalendar.txt\n");
         return 1;
@@ -63,7 +51,16 @@ int main() {
 
     fclose(fin);
 
-    qsort(a, n, sizeof(Aktivnost), compare);
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (a[i].start > a[j].start ||
+               (a[i].start == a[j].start && a[i].end > a[j].end)) {
+                Aktivnost tmp = a[i];
+                a[i] = a[j];
+                a[j] = tmp;
+            }
+        }
+    }
 
     FILE *fs = fopen("kalendar_sortirano.txt", "w");
     for (int i = 0; i < n; i++)
