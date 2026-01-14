@@ -1,23 +1,24 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 int main() {
     FILE *ulaz = fopen("ulaz.c", "r");
     FILE *izlaz = fopen("izlaz.c", "w");
 
-    if (ulaz == NULL || izlaz == NULL) {
+    if (!ulaz || !izlaz) {
         printf("Greska pri otvaranju datoteke\n");
         return 1;
     }
 
     int c, sledeci;
-    int linijski = 0;
-    int blokovski = 0;
+    bool linijski = false;
+    bool blokovski = false;
 
     while ((c = fgetc(ulaz)) != EOF) {
 
         if (linijski) {
             if (c == '\n') {
-                linijski = 0;
+                linijski = false;
                 fputc(c, izlaz);
             }
             continue;
@@ -27,7 +28,7 @@ int main() {
             if (c == '*') {
                 sledeci = fgetc(ulaz);
                 if (sledeci == '/') {
-                    blokovski = 0;
+                    blokovski = false;
                 } else {
                     ungetc(sledeci, ulaz);
                 }
@@ -39,10 +40,10 @@ int main() {
             sledeci = fgetc(ulaz);
 
             if (sledeci == '/') {
-                linijski = 1;
+                linijski = true;
                 continue;
             } else if (sledeci == '*') {
-                blokovski = 1;
+                blokovski = true;
                 continue;
             } else {
                 fputc(c, izlaz);
