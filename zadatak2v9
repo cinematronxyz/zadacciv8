@@ -9,17 +9,15 @@ typedef struct cvor
 
 int meni();
 void dodaj(tCvor**, char);
-void modifikuj(tCvor*, char, char);
+void modifikuj(tCvor**, char, char);
 tCvor* pronadji(tCvor*, char);
-void sort(tCvor*);
 void printList(tCvor*);
 void unisti(tCvor*);
 
 int main()
 {
 	char slovo1, slovo2;
-	int i;
-
+	int broj;
 	tCvor* glava = NULL;
 	tCvor* temp;
 
@@ -33,95 +31,129 @@ int main()
 			slovo1 = getc(stdin);
 			dodaj(&glava, slovo1);
 			break;
+
 		case 2:
 			printf("Unesite slovo koje zelite da modifikujete i u koje slovo\n> ");
 			getchar();
 			slovo1 = getc(stdin);
 			getchar();
 			slovo2 = getc(stdin);
-
-			modifikuj(glava, slovo1, slovo2);
+			modifikuj(&glava, slovo1, slovo2);
 			break;
+
 		case 3:
-			i = 0;
 			printf("Unesite slovo koje zelite da pronadjete\n> ");
 			getchar();
 			slovo1 = getc(stdin);
 
+			broj = 0;
 			temp = glava;
-			while (temp)
+			while ((temp = pronadji(temp, slovo1)) != NULL)
 			{
-				if (temp->karakter == slovo1)
-					i++;
+				broj++;
 				temp = temp->sledeci;
 			}
 
-			// Sa funkcijom pronadji();
-			/*do
-			{
-				temp = pronadji(&temp, slovo1);
-				if (temp != NULL)
-				{
-					i++;
-					temp = temp->sledeci;
-				}
-			} while (temp != NULL);*/
-
-			printf("Karaktera %c ima %d\n", slovo1, i);
+			printf("Karaktera %c ima %d\n", slovo1, broj);
 			break;
+
 		case 4:
 			printList(glava);
-			sort(glava);
-			printList(glava);
 			break;
+
 		case 5:
 			unisti(glava);
 			return 0;
 		}
 	}
-
-	return 0;
 }
 
 int meni()
 {
 	int izbor;
 
-	printf("Odaberite nesto od ponudjenog:\n");
-	printf("\t1. Sortirani unos karaktera.\n");
-	printf("\t2. Modifikacija karaktera.\n");
-	printf("\t3. Trazenje karaktera.\n");
-	printf("\t4. Prikaz liste.\n");
-	printf("\t5. Kraj programa.\n");
+	printf("\nOdaberite nesto od ponudjenog:\n");
+	printf("\t1. Sortirani unos karaktera\n");
+	printf("\t2. Modifikacija karaktera\n");
+	printf("\t3. Trazenje karaktera\n");
+	printf("\t4. Prikaz liste\n");
+	printf("\t5. Kraj programa\n");
 	printf("> ");
 
 	scanf("%d", &izbor);
-
 	return izbor;
 }
 
 void dodaj(tCvor** glava, char slovo)
 {
 	tCvor* novi = malloc(sizeof(tCvor));
-
 	novi->karakter = slovo;
 	novi->sledeci = NULL;
 
-	if (*glava == NULL)
-		*glava = novi;
-	else
+	if (*glava == NULL || (*glava)->karakter >= slovo)
 	{
-		tCvor* temp = *glava;
-
-		while (temp->sledeci != NULL)
-			temp = temp->sledeci;
-
-		temp->sledeci = novi;
+		novi->sledeci = *glava;
+		*glava = novi;
+		return;
 	}
+
+	tCvor* temp = *glava;
+	while (temp->sledeci && temp->sledeci->karakter < slovo)
+		temp = temp->sledeci;
+
+	novi->sledeci = temp->sledeci;
+	temp->sledeci = novi;
+}
+
+void modifikuj(tCvor** glava, char staro, char novo)
+{
+	tCvor *temp = *glava, *prev = NULL;
+
+	while (temp && temp->karakter != staro)
+	{
+		prev = temp;
+		temp = temp->sledeci;
+	}
+
+	if (!temp)
+		return;
+
+	if (prev)
+		prev->sledeci = temp->sledeci;
+	else
+		*glava = temp->sledeci;
+
+	temp->karakter = novo;
+
+	if (*glava == NULL || (*glava)->karakter >= novo)
+	{
+		temp->sledeci = *glava;
+		*glava = temp;
+		return;
+	}
+
+	tCvor* t = *glava;
+	while (t->sledeci && t->sledeci->karakter < novo)
+		t = t->sledeci;
+
+	temp->sledeci = t->sledeci;
+	t->sledeci = temp;
+}
+
+tCvor* pronadji(tCvor* glava, char slovo)
+{
+	while (glava)
+	{
+		if (glava->karakter == slovo)
+			return glava;
+		glava = glava->sledeci;
+	}
+	return NULL;
 }
 
 void printList(tCvor* glava)
 {
+	printf("Lista: ");
 	while (glava)
 	{
 		printf("%c ", glava->karakter);
@@ -133,57 +165,10 @@ void printList(tCvor* glava)
 void unisti(tCvor* glava)
 {
 	tCvor* temp;
-
 	while (glava)
 	{
 		temp = glava;
 		glava = glava->sledeci;
 		free(temp);
-	}
-}
-
-tCvor* pronadji(tCvor* glava, char slovo)
-{
-	if (glava == NULL)
-		return NULL;
-
-	tCvor* temp = glava;
-	while (temp->karakter != slovo)
-	{
-		temp = temp->sledeci;
-		if (temp == NULL)
-			break;
-	}
-	return temp;
-}
-
-void modifikuj(tCvor* glava, char a, char b)
-{
-	tCvor* temp = glava;
-	while (temp)
-	{
-		if (temp->karakter == a)
-			temp->karakter = b;
-		temp = temp->sledeci;
-	}
-}
-
-void sort(tCvor* glava)
-{
-	tCvor* prvi = glava;
-	while (prvi->sledeci)
-	{
-		tCvor* drugi = prvi->sledeci;
-		while (drugi)
-		{
-			if (prvi->karakter > drugi->karakter)
-			{
-				char temp = prvi->karakter;
-				prvi->karakter = drugi->karakter;
-				drugi->karakter = temp;
-			}
-			drugi = drugi->sledeci;
-		}
-		prvi = prvi->sledeci;
 	}
 }
