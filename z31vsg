@@ -1,113 +1,75 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-#define TABLE_SIZE 11  // prost broj za heš funkciju
+#define TABLE_SIZE 7  // mali prost broj za primer
 
-typedef struct {
-    int key;
-    int value;
-    int is_occupied; // 0 = prazno, 1 = zauzeto, -1 = obrisano
-} HashEntry;
+int table[TABLE_SIZE]; // -1 znači prazno
 
-// Inicijalizacija tabele
-void init_table(HashEntry table[]) {
-    for(int i = 0; i < TABLE_SIZE; i++) {
-        table[i].is_occupied = 0;
-    }
+void init_table() {
+    for(int i = 0; i < TABLE_SIZE; i++)
+        table[i] = -1; // -1 = prazno
 }
 
-// Heš funkcija: ostatak pri deljenju prostim brojem
+// Heš funkcija: ostatak pri deljenju
 int hash(int key) {
     return key % TABLE_SIZE;
 }
 
-// Ubacivanje elementa u tabelu
-void insert(HashEntry table[], int key, int value) {
+// Ubacivanje elementa
+void insert(int key) {
     int index = hash(key);
-    int original_index = index;
+    int start = index;
 
-    while(table[index].is_occupied == 1) {
-        if(table[index].key == key) {
-            // Ako ključ već postoji, ažuriramo vrednost
-            table[index].value = value;
-            return;
-        }
-        index = (index + 1) % TABLE_SIZE;
-        if(index == original_index) {
-            printf("Tabela je puna, ne može se ubaciti ključ %d\n", key);
+    while(table[index] != -1) { // dokle god nije prazno
+        index = (index + 1) % TABLE_SIZE; // linearno
+        if(index == start) { // cela tabela puna
+            printf("Tabela je puna, ne moze se ubaciti %d\n", key);
             return;
         }
     }
-
-    table[index].key = key;
-    table[index].value = value;
-    table[index].is_occupied = 1;
+    table[index] = key;
 }
 
-// Pronalaženje vrednosti po ključu
-int search(HashEntry table[], int key) {
+// Pretraga
+int search(int key) {
     int index = hash(key);
-    int original_index = index;
+    int start = index;
 
-    while(table[index].is_occupied != 0) {
-        if(table[index].is_occupied == 1 && table[index].key == key) {
-            return table[index].value;
-        }
+    while(table[index] != -1) {
+        if(table[index] == key)
+            return index; // pronađeno
         index = (index + 1) % TABLE_SIZE;
-        if(index == original_index) break; // cela tabela pregledana
+        if(index == start)
+            break; // cela tabela pregledana
     }
     return -1; // nije pronađeno
 }
 
-// Brisanje elementa po ključu
-void delete(HashEntry table[], int key) {
-    int index = hash(key);
-    int original_index = index;
-
-    while(table[index].is_occupied != 0) {
-        if(table[index].is_occupied == 1 && table[index].key == key) {
-            table[index].is_occupied = -1; // označimo kao obrisano
-            printf("Ključ %d obrisan.\n", key);
-            return;
-        }
-        index = (index + 1) % TABLE_SIZE;
-        if(index == original_index) break;
-    }
-    printf("Ključ %d nije pronađen.\n", key);
-}
-
 // Štampanje tabele
-void print_table(HashEntry table[]) {
+void print_table() {
     printf("Heš tabela:\n");
-    for(int i = 0; i < TABLE_SIZE; i++) {
-        if(table[i].is_occupied == 1) {
-            printf("[%d] -> Key: %d, Value: %d\n", i, table[i].key, table[i].value);
-        } else if(table[i].is_occupied == -1) {
-            printf("[%d] -> Obrišeno\n", i);
-        } else {
+    for(int i = 0; i < TABLE_SIZE; i++)
+        if(table[i] != -1)
+            printf("[%d] -> %d\n", i, table[i]);
+        else
             printf("[%d] -> Prazno\n", i);
-        }
-    }
 }
 
 int main() {
-    HashEntry table[TABLE_SIZE];
-    init_table(table);
+    init_table();
 
-    insert(table, 10, 100);
-    insert(table, 21, 200);
-    insert(table, 32, 300);
-    insert(table, 43, 400);
+    insert(10);
+    insert(3);
+    insert(17);
+    insert(24);
 
-    print_table(table);
+    print_table();
 
-    int val = search(table, 21);
-    if(val != -1) printf("Vrednost za ključ 21: %d\n", val);
-
-    delete(table, 21);
-    delete(table, 99); // ne postoji
-
-    print_table(table);
+    int key = 17;
+    int pos = search(key);
+    if(pos != -1)
+        printf("Ključ %d pronadjen na poziciji %d\n", key, pos);
+    else
+        printf("Ključ %d nije pronadjen\n", key);
 
     return 0;
 }
