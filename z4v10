@@ -1,17 +1,17 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-#define TABLE_SIZE 73
+#define SIZE 11
+#define PRIME 7
 #define EMPTY -1
 
-int hashTable[TABLE_SIZE];
+int hashTable[SIZE];
 
 int hash(int key) {
-    return key % TABLE_SIZE;
+    return key % PRIME;
 }
 
-void initTable() {
-    for (int i = 0; i < TABLE_SIZE; i++) {
+void init() {
+    for (int i = 0; i < SIZE; i++) {
         hashTable[i] = EMPTY;
     }
 }
@@ -19,8 +19,9 @@ void initTable() {
 void insert(int key) {
     int index = hash(key);
 
+    // otvoreno adresiranje (linear probing)
     while (hashTable[index] != EMPTY) {
-        index = (index + 1) % TABLE_SIZE;
+        index = (index + 1) % SIZE;
     }
 
     hashTable[index] = key;
@@ -28,65 +29,48 @@ void insert(int key) {
 
 int search(int key) {
     int index = hash(key);
-    int startIndex = index;
+    int start = index;
 
     while (hashTable[index] != EMPTY) {
-        if (hashTable[index] == key) {
+        if (hashTable[index] == key)
             return index;
-        }
-        index = (index + 1) % TABLE_SIZE;
 
-        if (index == startIndex) {
+        index = (index + 1) % SIZE;
+
+        if (index == start)
             break;
-        }
     }
     return -1;
 }
 
 void printTable() {
-    for (int i = 0; i < TABLE_SIZE; i++) {
+    for (int i = 0; i < SIZE; i++) {
         if (hashTable[i] == EMPTY)
-            printf("%2d: ---\n", i);
+            printf("[%d] : EMPTY\n", i);
         else
-            printf("%2d: %d\n", i, hashTable[i]);
+            printf("[%d] : %d\n", i, hashTable[i]);
     }
 }
 
 int main() {
-    initTable();
+    init();
 
-    int choice, key;
+    int keys[] = {18, 41, 22, 44, 59, 32, 31};
+    int n = sizeof(keys) / sizeof(keys[0]);
 
-    do {
-        printf("\n1. Ubaci kljuc");
-        printf("\n2. Pronadji kljuc");
-        printf("\n3. Ispisi tabelu");
-        printf("\n0. Izlaz\n");
-        printf("Izbor: ");
-        scanf("%d", &choice);
+    for (int i = 0; i < n; i++) {
+        insert(keys[i]);
+    }
 
-        switch (choice) {
-            case 1:
-                printf("Unesi kljuc: ");
-                scanf("%d", &key);
-                insert(key);
-                break;
+    printTable();
 
-            case 2:
-                printf("Unesi kljuc za pretragu: ");
-                scanf("%d", &key);
-                int pos = search(key);
-                if (pos != -1)
-                    printf("Kljuc pronadjen na poziciji %d\n", pos);
-                else
-                    printf("Kljuc nije pronadjen\n");
-                break;
+    int k = 44;
+    int pos = search(k);
 
-            case 3:
-                printTable();
-                break;
-        }
-    } while (choice != 0);
+    if (pos != -1)
+        printf("\nKljuc %d pronadjen na poziciji %d\n", k, pos);
+    else
+        printf("\nKljuc %d nije pronadjen\n", k);
 
     return 0;
 }
