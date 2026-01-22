@@ -1,0 +1,230 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Cvor {
+    int podatak;
+    struct Cvor* levo;
+    struct Cvor* desno;
+} Cvor;
+
+Cvor* napraviCvor(int x) {
+    Cvor* novi = (Cvor*)malloc(sizeof(Cvor));
+    novi->podatak = x;
+    novi->levo = NULL;
+    novi->desno = NULL;
+    return novi;
+}
+
+Cvor* ubaci(Cvor* koren, int x) {
+    if (koren == NULL)
+        return napraviCvor(x);
+
+    if (x < koren->podatak)
+        koren->levo = ubaci(koren->levo, x);
+    else if (x > koren->podatak)
+        koren->desno = ubaci(koren->desno, x);
+
+    return koren;
+}
+
+Cvor* pretrazi(Cvor* koren, int x) {
+    if (koren == NULL || koren->podatak == x)
+        return koren;
+
+    if (x < koren->podatak)
+        return pretrazi(koren->levo, x);
+    else
+        return pretrazi(koren->desno, x);
+}
+
+Cvor* minimum(Cvor* koren) {
+    while (koren->levo != NULL)
+        koren = koren->levo;
+    return koren;
+}
+
+Cvor* obrisi(Cvor* koren, int x) {
+    if (koren == NULL)
+        return koren;
+
+    if (x < koren->podatak)
+        koren->levo = obrisi(koren->levo, x);
+    else if (x > koren->podatak)
+        koren->desno = obrisi(koren->desno, x);
+    else {
+        if (koren->levo == NULL) {
+            Cvor* temp = koren->desno;
+            free(koren);
+            return temp;
+        }
+        if (koren->desno == NULL) {
+            Cvor* temp = koren->levo;
+            free(koren);
+            return temp;
+        }
+
+        Cvor* temp = minimum(koren->desno);
+        koren->podatak = temp->podatak;
+        koren->desno = obrisi(koren->desno, temp->podatak);
+    }
+    return koren;
+}
+
+void inorder(Cvor* koren) {
+    if (koren != NULL) {
+        inorder(koren->levo);
+        printf("%d ", koren->podatak);
+        inorder(koren->desno);
+    }
+}
+
+void preorder(Cvor* koren) {
+    if (koren != NULL) {
+        printf("%d ", koren->podatak);
+        preorder(koren->levo);
+        preorder(koren->desno);
+    }
+}
+
+void postorder(Cvor* koren) {
+    if (koren != NULL) {
+        postorder(koren->levo);
+        postorder(koren->desno);
+        printf("%d ", koren->podatak);
+    }
+}
+
+int visina(Cvor* koren) {
+    if (koren == NULL)
+        return 0;
+
+    int l = visina(koren->levo);
+    int d = visina(koren->desno);
+
+    return (l > d ? l : d) + 1;
+}
+
+int brojElemenata(Cvor* koren) {
+    if (koren == NULL)
+        return 0;
+    return 1 + brojElemenata(koren->levo) + brojElemenata(koren->desno);
+}
+
+int sumaElemenata(Cvor* koren) {
+    if (koren == NULL)
+        return 0;
+    return koren->podatak +
+           sumaElemenata(koren->levo) +
+           sumaElemenata(koren->desno);
+}
+
+void ispisiListove(Cvor* koren) {
+    if (koren == NULL)
+        return;
+
+    if (koren->levo == NULL && koren->desno == NULL)
+        printf("%d ", koren->podatak);
+
+    ispisiListove(koren->levo);
+    ispisiListove(koren->desno);
+}
+
+int brojNaNtomNivou(Cvor* koren, int nivo) {
+    if (koren == NULL)
+        return 0;
+
+    if (nivo == 0)
+        return 1;
+
+    return brojNaNtomNivou(koren->levo, nivo - 1) +
+           brojNaNtomNivou(koren->desno, nivo - 1);
+}
+
+int brojSaObaDeteta(Cvor* koren) {
+    if (koren == NULL)
+        return 0;
+
+    int oba = (koren->levo != NULL && koren->desno != NULL);
+
+    return oba +
+           brojSaObaDeteta(koren->levo) +
+           brojSaObaDeteta(koren->desno);
+}
+
+void meni() {
+    printf("\n1. Unos elementa");
+    printf("\n2. Brisanje elementa");
+    printf("\n3. Pretraga elementa");
+    printf("\n4. Inorder");
+    printf("\n5. Preorder");
+    printf("\n6. Postorder");
+    printf("\n7. Visina stabla");
+    printf("\n8. Broj elemenata");
+    printf("\n9. Suma elemenata");
+    printf("\n10. Ispis listova");
+    printf("\n11. Broj elemenata na N-tom nivou");
+    printf("\n12. Broj elemenata sa oba deteta");
+    printf("\n0. Izlaz\n");
+}
+
+int main() {
+    Cvor* koren = NULL;
+    int izbor, x;
+
+    do {
+        meni();
+        scanf("%d", &izbor);
+
+        switch (izbor) {
+        case 1:
+            scanf("%d", &x);
+            koren = ubaci(koren, x);
+            break;
+        case 2:
+            scanf("%d", &x);
+            koren = obrisi(koren, x);
+            break;
+        case 3:
+            scanf("%d", &x);
+            if (pretrazi(koren, x))
+                printf("Postoji\n");
+            else
+                printf("Ne postoji\n");
+            break;
+        case 4:
+            inorder(koren);
+            printf("\n");
+            break;
+        case 5:
+            preorder(koren);
+            printf("\n");
+            break;
+        case 6:
+            postorder(koren);
+            printf("\n");
+            break;
+        case 7:
+            printf("%d\n", visina(koren));
+            break;
+        case 8:
+            printf("%d\n", brojElemenata(koren));
+            break;
+        case 9:
+            printf("%d\n", sumaElemenata(koren));
+            break;
+        case 10:
+            ispisiListove(koren);
+            printf("\n");
+            break;
+        case 11:
+            scanf("%d", &x);
+            printf("%d\n", brojNaNtomNivou(koren, x));
+            break;
+        case 12:
+            printf("%d\n", brojSaObaDeteta(koren));
+            break;
+        }
+    } while (izbor != 0);
+
+    return 0;
+}
