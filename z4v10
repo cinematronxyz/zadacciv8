@@ -19,7 +19,6 @@ void init() {
 void insert(int key) {
     int index = hash(key);
 
-    // otvoreno adresiranje (linear probing)
     while (hashTable[index] != EMPTY) {
         index = (index + 1) % SIZE;
     }
