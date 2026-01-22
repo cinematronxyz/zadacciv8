@@ -1,10 +1,11 @@
 #include <stdio.h>
 
-void toBinary(int n) {
+long long toBinary(int n) {
     if (n == 0)
-        return;
-    toBinary(n / 2);
-    printf("%d", n % 2);
+        return 0;
+    if (n == 1)
+        return 1;
+    return toBinary(n / 2) * 10 + n % 2;
 }
 
 int main() {
@@ -12,12 +13,11 @@ int main() {
     printf("Unesi nenegativan broj: ");
     scanf("%d", &n);
     
-    if (n == 0) {
-        printf("0");
+    if (n < 0) {
+        printf("Broj treba da bude nenegativan!\n");
     } else {
-        toBinary(n);
+        printf("%lld\n", toBinary(n));
     }
-    printf("\n");
     
     return 0;
 }
