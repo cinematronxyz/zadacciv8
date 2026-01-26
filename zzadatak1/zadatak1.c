@@ -56,4 +56,3 @@ int main() {
     fclose(ulaz);
     fclose(izlaz);
     return 0;
-}
